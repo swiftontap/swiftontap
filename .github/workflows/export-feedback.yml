@@ -32,7 +32,7 @@ jobs:
         aws dynamodb scan --table-name Feedback-QA --region us-west-2 > feedback-qa.json || echo "Feedback-QA table not found"
 
     - name: Upload feedback data
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: feedback-data
         path: |
