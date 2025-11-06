@@ -1,0 +1,40 @@
+name: Export Feedback Data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    name: Export Feedback from DynamoDB
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: List DynamoDB tables
+      run: |
+        echo "Available tables:"
+        aws dynamodb list-tables --region us-west-2
+
+    - name: Export Feedback table (try prod)
+      run: |
+        echo "Attempting to scan Feedback table..."
+        aws dynamodb scan --table-name Feedback --region us-west-2 > feedback-prod.json || echo "Feedback table not found"
+        
+    - name: Export Feedback-QA table
+      run: |
+        echo "Attempting to scan Feedback-QA table..."
+        aws dynamodb scan --table-name Feedback-QA --region us-west-2 > feedback-qa.json || echo "Feedback-QA table not found"
+
+    - name: Upload feedback data
+      uses: actions/upload-artifact@v3
+      with:
+        name: feedback-data
+        path: |
+          feedback-*.json
+
